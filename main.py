@@ -53,6 +53,7 @@ def wsd(model_prob):
     word_id = lexelt.get('item')
     for i in lexelt.findall('instance'):
       # words before context
+      instance_id = i.get('id')
       wordsbefore =  i.find('context').text
       fourwordsbefore = wordsbefore.split()[-4:]
 
@@ -69,5 +70,4 @@ def wsd(model_prob):
 
 
 trained = train()
-print trained
-# wsd(trained)
+wsd(trained)
