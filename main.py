@@ -1,21 +1,28 @@
 import xml.etree.ElementTree as etree
 import operator
+from bs4 import BeautifulSoup
 
 def train():
-  tree = etree.parse('training-data.data.xml')
+
+  soup = BeautifulSoup(open("training-data.data.xml"))
   model = {}
 
-  for lexelt in tree.findall('lexelt'):
+  for lexelt in soup.find_all('lexelt'):
     word_id = lexelt.get('item')
     if word_id not in model:
       model[word_id] = {}
-    for i in lexelt.findall('instance'):
+    for i in lexelt.find_all('instance'):
       # words before context
-      wordsbefore =  i.find('context').text
+      wordsbefore =  i.find('context').contents[0]
       fourwordsbefore = wordsbefore.split()[-4:]
 
-      for w in fourwordsbefore:
-        for answer in i.findall('answer'):
+      wordsafter =  i.find('context').contents[2]
+      fourwordsafter = wordsafter.split()[-4:]
+
+      contextwords = fourwordsbefore + fourwordsafter
+
+      for w in contextwords:
+        for answer in i.find_all('answer'):
           senseID = answer.get('senseid')
           if w in model[word_id]:
             if senseID in model[word_id][w]:
@@ -62,4 +69,5 @@ def wsd(model_prob):
 
 
 trained = train()
-wsd(trained)
+print trained
+# wsd(trained)
