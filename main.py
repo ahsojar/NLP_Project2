@@ -1,9 +1,12 @@
 import xml.etree.ElementTree as etree
 import operator
+import os
+import os.path
 from bs4 import BeautifulSoup
 import nltk
 from nltk.corpus import stopwords
 
+kaggleTest = "kaggleTest.txt"
 
 def train():
   tree = BeautifulSoup(open("training-data.data.xml"))
@@ -87,6 +90,7 @@ def wsd(model_prob, prior_prob):
         if s in prior_prob:
           sense_probs[s]*= prior_prob[s]
       print sense_probs
+      print_to_file(sense_probs, instance_id)
 
 # Returns context words given text before, after, a window size, 
 # and a boolean indicating whether to remove stopwords
@@ -99,6 +103,16 @@ def get_context_words(contextbefore, contextafter, window, remove_stopwords):
   else:
     contextwords = contextbefore.split()[-window:] + contextafter.split()[-window:]
   return contextwords
+
+def max_prob(sense_probs):
+  maxValue = max(sense_probs.iteritems(), key=operator.itemgetter(1))[0]
+  return maxValue
+
+def print_to_file(sense_probs, instance_id):
+  mode = 'a' if os.path.exists(kaggleTest) else 'w'
+  tree = etree.parse('test-data.data.xml')
+  with open(kaggleTest, mode) as f:
+    f.write(instance_id + "," + max_prob(sense_probs) + "\n")
 
 trained = train()
 wsd(trained[0], trained[1])
