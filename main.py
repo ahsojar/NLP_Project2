@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import nltk
 from nltk.corpus import stopwords
 
-kaggleTest = "kaggleTest.txt"
+kaggleTest = "kaggleTest.csv"
 
 def train():
   tree = BeautifulSoup(open("training-data.data.xml"))
@@ -23,7 +23,7 @@ def train():
       wordsbefore =  i.find('context').contents[0]
       wordsafter =  i.find('context').contents[2]
 
-      contextwords = get_context_words(wordsbefore,wordsafter,4, True)
+      contextwords = get_context_words(wordsbefore,wordsafter,6, True)
 
       for w in contextwords:
         for answer in i.find_all('answer'):
@@ -74,7 +74,7 @@ def wsd(model_prob, prior_prob):
       wordsbefore =  i.find('context').contents[0]
       wordsafter =  i.find('context').contents[2]
 
-      contextwords = get_context_words(wordsbefore,wordsafter,4, True)
+      contextwords = get_context_words(wordsbefore,wordsafter,6, True)
       sense_probs = {}
 
       for w in contextwords:
@@ -89,7 +89,6 @@ def wsd(model_prob, prior_prob):
       for s in sense_probs:
         if s in prior_prob:
           sense_probs[s]*= prior_prob[s]
-      print sense_probs
       print_to_file(sense_probs, instance_id)
 
 # Returns context words given text before, after, a window size, 
@@ -105,17 +104,24 @@ def get_context_words(contextbefore, contextafter, window, remove_stopwords):
   return contextwords
 
 def max_prob(sense_probs):
-  maxValue = max(sense_probs.iteritems(), key=operator.itemgetter(1))[0]
+  if sense_probs == {} or sense_probs == None:
+    maxValue = "U"
+  else:
+    maxValue = max(sense_probs.iteritems(), key=operator.itemgetter(1))[0]
   return maxValue
 
 def print_to_file(sense_probs, instance_id):
-  mode = 'a' if os.path.exists(kaggleTest) else 'w'
+  if os.path.exists(kaggleTest):
+    mode = 'a'  
+  else: 
+    mode = 'a'
+    with open(kaggleTest, mode) as f:
+      f.write("Id,Prediction\n")
   tree = etree.parse('test-data.data.xml')
   with open(kaggleTest, mode) as f:
     f.write(instance_id + "," + max_prob(sense_probs) + "\n")
 
+
 trained = train()
 wsd(trained[0], trained[1])
-
-
 
