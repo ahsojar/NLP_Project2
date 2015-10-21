@@ -9,6 +9,7 @@ from nltk.corpus import stopwords
 kaggleTest = "kaggleTest.csv"
 
 def train():
+  print "training..."
   tree = BeautifulSoup(open("training-data.data.xml"))
   model = {}
   prior_prob = {}
@@ -23,16 +24,16 @@ def train():
       wordsbefore =  i.find('context').contents[0]
       wordsafter =  i.find('context').contents[2]
 
-      contextwords = get_context_words(wordsbefore,wordsafter,6, True)
+      contextwords = get_context_words(wordsbefore,wordsafter,2, True)
 
-      for w in contextwords:
-        for answer in i.find_all('answer'):
-          senseID = answer.get('senseid')
-          if senseID not in prior_prob[word_id]:
-            prior_prob[word_id][senseID] = 1
-          else: 
-            prior_prob[word_id][senseID] += 1
+      for answer in i.find_all('answer'):
+        senseID = answer.get('senseid')
+        if senseID not in prior_prob[word_id]:
+          prior_prob[word_id][senseID] = 1
+        else: 
+          prior_prob[word_id][senseID] += 1
 
+        for w in contextwords:
           if w in model[word_id]:
             if senseID in model[word_id][w]:
               model[word_id][w][senseID] += 1
@@ -48,9 +49,14 @@ def train():
     model_prob[word] ={}
     for context in model[word]:
       senses = model[word][context]
-      factor = 1.0/sum(senses.itervalues())
+      # vocab = len(model_prob[word])
+      # for s in senses:
+      #   senses[s] = senses[s] + 1
+      #factor = 1.0/(sum(senses.itervalues())+ vocab)
+      factor = 1.0/(sum(senses.itervalues()))
       normalized = {k: v*factor for k, v in senses.iteritems()}
       model_prob[word][context] = normalized
+      #model_prob[word]['UNK'] = 1 - sum(normalized.itervalues())
   
   #normalize prior probabilities
   for word in prior_prob:
@@ -63,6 +69,7 @@ def train():
 
 
 def wsd(model_prob, prior_prob):
+  print "Going through test set..."
   tree = BeautifulSoup(open("test-data.data.xml"))
 
   for lexelt in tree.find_all('lexelt'):
@@ -74,22 +81,20 @@ def wsd(model_prob, prior_prob):
       wordsbefore =  i.find('context').contents[0]
       wordsafter =  i.find('context').contents[2]
 
-      contextwords = get_context_words(wordsbefore,wordsafter,6, True)
-      sense_probs = {}
+      contextwords = get_context_words(wordsbefore,wordsafter,2, True)
+      sense_probs = prior_prob[word_id].copy()
 
       for w in contextwords:
         if w in model_prob[word_id]:
           senses = model_prob[word_id][w]
-          for s in senses:
-            if s in sense_probs:
-              sense_probs[s] *= model_prob[word_id][w][s]
+          for s in sense_probs:
+            if s in senses:
+              sense_probs[s] *= senses[s]
             else:
-              sense_probs[s] = model_prob[word_id][w][s]
-      #multiply sense probs by prior prob
-      for s in sense_probs:
-        if s in prior_prob:
-          sense_probs[s]*= prior_prob[s]
+              sense_probs[s] *= .1
+
       print_to_file(sense_probs, instance_id)
+    
 
 # Returns context words given text before, after, a window size, 
 # and a boolean indicating whether to remove stopwords
@@ -108,6 +113,7 @@ def max_prob(sense_probs):
     maxValue = "U"
   else:
     maxValue = max(sense_probs.iteritems(), key=operator.itemgetter(1))[0]
+    print maxValue
   return maxValue
 
 def print_to_file(sense_probs, instance_id):
