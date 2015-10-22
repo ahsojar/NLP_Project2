@@ -88,7 +88,7 @@ def wsd(model_prob, prior_prob):
           if w in model_prob[word_id][s]:
             sense_probs[s] *= model_prob[word_id][s][w]
           else:
-            sense_probs[s] *= .1
+            sense_probs[s] *= model_prob[word_id][s]['UNK']
       print_to_file(sense_probs, instance_id)
     
 
