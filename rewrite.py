@@ -12,7 +12,6 @@ def train():
   print "training..."
   tree = BeautifulSoup(open("training-data.data.xml"))
   model = {}
-  prior_counts= {}
   prior_prob = {}
 
   for lexelt in tree.find_all('lexelt'):
@@ -43,16 +42,13 @@ def train():
           else:
             model[word_id][senseID][w] = 1
 
-  prior_counts = prior_prob.copy()
   #normalizes counts into probabilities
   model_prob = {}
   for word in model:
     model_prob[word] ={}
     for sense in model[word]:
-      print prior_counts[word_id]
-      number_of_this_sense = prior_counts[word_id][sense]
       context = model[word][sense]
-      factor = 1.0/(number_of_this_sense)
+      factor = 1.0/(sum(context.itervalues()))
       normalized = {k: v*factor for k, v in context.iteritems()}
       model_prob[word][sense] = normalized
   
