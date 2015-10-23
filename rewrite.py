@@ -24,7 +24,7 @@ def train():
       wordsbefore =  i.find('context').contents[0]
       wordsafter =  i.find('context').contents[2]
 
-      contextwords = get_context_words(wordsbefore,wordsafter,2, True)
+      contextwords = get_context_words(wordsbefore,wordsafter,4, True)
 
       for answer in i.find_all('answer'):
         senseID = answer.get('senseid')
@@ -80,7 +80,7 @@ def wsd(model_prob, prior_prob):
       wordsbefore =  i.find('context').contents[0]
       wordsafter =  i.find('context').contents[2]
 
-      contextwords = get_context_words(wordsbefore,wordsafter,2, True)
+      contextwords = get_context_words(wordsbefore,wordsafter,4, True)
       sense_probs = prior_prob[word_id].copy()
 
       for w in contextwords:
@@ -88,7 +88,7 @@ def wsd(model_prob, prior_prob):
           if w in model_prob[word_id][s]:
             sense_probs[s] *= model_prob[word_id][s][w]
           else:
-            sense_probs[s] *= .1
+            sense_probs[s] *= .001
       print_to_file(sense_probs, instance_id)
     
 
