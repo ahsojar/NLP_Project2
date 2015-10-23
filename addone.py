@@ -125,5 +125,6 @@ def print_to_file(sense_probs, instance_id):
 
 
 trained = train()
+print trained[0]
 wsd(trained[0], trained[1])
 
