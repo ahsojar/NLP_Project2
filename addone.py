@@ -51,7 +51,7 @@ def train():
       for c in context:
         context[c] = context[c] +1
       context['UNK'] = 1
-      factor = 1.0/(prior_prob[word][sense] + len(context))
+      factor = 1.0/(prior_prob[word][sense])
       normalized = {k: v*factor for k, v in context.iteritems()}
       model_prob[word][sense] = normalized
   

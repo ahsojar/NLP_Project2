@@ -10,18 +10,18 @@ from nltk.corpus import stopwords
 kaggleTest = "kaggleTest.csv"
 
 def train(filename):
-  '''
+  """
   Given a training data filename, it will parse the XML and find co-occurence feature probabilities. 
   Looks at context words before and after the target word we are disambiguating, but disregards order or placement.
 
   Params:
-  String of Filename
+  filename: string
 
   Returns:
   The trained model, where 
   trained[0] = dictionary of prior probabilities of senses, without context words
   trained[1] = dictionary of probabilities of context words for each sense
-  '''
+  """
   print "Training..."
   tree = BeautifulSoup(open(filename))
   model = {}
@@ -82,7 +82,7 @@ def train(filename):
 ##################################################################
 
 def wsd(test_filename, model_prob, prior_prob):
-  '''
+  """
   Will go through test data and disambiguate each instance. Will output results in a seperate CSV file.
 
   Params:
@@ -92,7 +92,7 @@ def wsd(test_filename, model_prob, prior_prob):
 
   Returns:
   void
-  '''
+  """
   print "Going through test set..."
   tree = BeautifulSoup(open(test_filename))
 
@@ -118,7 +118,7 @@ def wsd(test_filename, model_prob, prior_prob):
 ##################################################################
 
 def get_context_words(contextbefore, contextafter, window, remove_stopwords):
-  '''
+  """
   Returns array of context words for this given instance, depending on window size and whether stopwords are removed
 
   Params:
@@ -129,7 +129,7 @@ def get_context_words(contextbefore, contextafter, window, remove_stopwords):
 
   Returns:
   Array of context words
-  '''
+  """
   if remove_stopwords:
     stopwords = nltk.corpus.stopwords.words('english')
     words_before = [w for w in contextbefore.split() if w.lower() not in stopwords]
@@ -142,7 +142,7 @@ def get_context_words(contextbefore, contextafter, window, remove_stopwords):
 ##################################################################
 
 def max_prob(sense_probs):
-  '''
+  """
   Finds the sense with the max probability.
   Params:
   sense_probs: dictionary of sense_ids and their probabilities; can be {}
@@ -150,7 +150,7 @@ def max_prob(sense_probs):
   Returns:
   senseID with the max probability. Returns "U" if no senses are specified
 
-  '''
+  """
   if sense_probs == {} or sense_probs == None:
     maxValue = "U"
   else:
@@ -161,7 +161,7 @@ def max_prob(sense_probs):
 ##################################################################
 
 def print_to_file(sense_probs, instance_id):
-  '''
+  """
   Outputs a line in our CSV to submit to Kaggle.
 
   Params:
@@ -170,7 +170,8 @@ def print_to_file(sense_probs, instance_id):
 
   Returns:
   void
-  '''
+  
+  """
   if os.path.exists(kaggleTest):
     mode = 'a'  
   else: 
