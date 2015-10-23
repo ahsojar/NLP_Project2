@@ -105,6 +105,7 @@ def wsd(test_filename, model_prob, prior_prob):
       wordsafter =  i.find('context').contents[2]
 
       contextwords = get_context_words(wordsbefore,wordsafter,4, True)
+      print contextwords
       sense_probs = prior_prob[word_id].copy()
 
       for w in contextwords:
@@ -134,9 +135,9 @@ def get_context_words(contextbefore, contextafter, window, remove_stopwords):
     stopwords = nltk.corpus.stopwords.words('english')
     words_before = [w for w in contextbefore.split() if w.lower() not in stopwords]
     words_after = [w for w in contextafter.split() if w.lower() not in stopwords]
-    contextwords = words_before[-window:] + words_after[-window:]
+    contextwords = words_before[-window:] + words_after[:window]
   else:
-    contextwords = contextbefore.split()[-window:] + contextafter.split()[-window:]
+    contextwords = contextbefore.split()[-window:] + contextafter.split()[:window]
   return contextwords
 
 ##################################################################
@@ -149,7 +150,6 @@ def max_prob(sense_probs):
 
   Returns:
   senseID with the max probability. Returns "U" if no senses are specified
-
   """
   if sense_probs == {} or sense_probs == None:
     maxValue = "U"
@@ -170,7 +170,7 @@ def print_to_file(sense_probs, instance_id):
 
   Returns:
   void
-  
+
   """
   if os.path.exists(kaggleTest):
     mode = 'a'  
