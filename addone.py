@@ -42,7 +42,6 @@ def train():
           else:
             model[word_id][senseID][w] = 1
 
-
   #normalizes counts into probabilities
   model_prob = {}
   for word in model:
@@ -52,8 +51,7 @@ def train():
       for c in context:
         context[c] = context[c] +1
       context['UNK'] = 1
-
-      factor = 1.0/(prior_prob[word][sense] + len(context) + 1 )
+      factor = 1.0/(prior_prob[word][sense] + len(context))
       normalized = {k: v*factor for k, v in context.iteritems()}
       model_prob[word][sense] = normalized
   
